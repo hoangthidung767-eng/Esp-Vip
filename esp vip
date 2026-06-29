@@ -1,0 +1,190 @@
+local A, B, C, D = game:GetService("Players"), game:GetService("UserInputService"), game:GetService("Players").LocalPlayer
+pcall(function() D = game:GetService("CoreGui") end)
+D = D or C:WaitForChild("PlayerGui", 10)
+if not D then return end
+
+-- Tự động dọn dẹp phiên bản menu cũ nếu có
+local x = D:FindFirstChild("EspVipMenu")
+if x then x:Destroy() end
+
+local E = Instance.new("ScreenGui", D)
+E.Name = "EspVipMenu"
+E.ResetOnSpawn = false
+
+-- NÚT BẤM MỞ MENU 🍌
+local F = Instance.new("TextButton", E)
+F.Size, F.Position, F.Text, F.TextScaled, F.BackgroundColor3, F.TextColor3 = UDim2.new(0, 45, 0, 45), UDim2.new(0, 10, 0.4, 0), "🍌", true, Color3.fromRGB(60, 60, 60), Color3.fromRGB(255, 255, 255)
+local CornerF = Instance.new("UICorner", F) CornerF.CornerRadius = UDim.new(0, 8)
+
+-- KHUNG MENU CHÍNH (Đã thu gọn chiều cao xuống 290)
+local G = Instance.new("Frame", E)
+G.Size, G.Position, G.BackgroundColor3, G.Visible = UDim2.new(0, 220, 0, 290), UDim2.new(0, 70, 0.4, 0), Color3.fromRGB(25, 25, 25), false
+local CornerG = Instance.new("UICorner", G) CornerG.CornerRadius = UDim.new(0, 10)
+
+-- VIỀN CẦU VỒNG (RAINBOW STROKE)
+local UIStroke = Instance.new("UIStroke", G)
+UIStroke.Thickness = 2
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- THANH TIÊU ĐỀ
+local H = Instance.new("TextLabel", G)
+H.Size, H.Text, H.TextSize, H.Font, H.TextColor3, H.BackgroundColor3 = UDim2.new(1, 0, 0, 35), "🍌 Esp Vip", 14, Enum.Font.SourceSansBold, Color3.fromRGB(255, 255, 255), Color3.fromRGB(35, 35, 35)
+local CornerH = Instance.new("UICorner", H) CornerH.CornerRadius = UDim.new(0, 10)
+
+-- BIẾN LƯU TRỮ TRẠNG THÁI CÁC TÍNH NĂNG
+local T, U, V = false, 16, 50
+
+----------------------------------------------------
+-- HIỆU ỨNG RAINBOW CẦU VỒNG CHẠY NGẦM -------------
+----------------------------------------------------
+task.spawn(function()
+    while task.wait() do
+        local hue = (tick() % 5) / 5
+        local rainbowColor = Color3.fromHSV(hue, 1, 1)
+        UIStroke.Color = rainbowColor
+        H.TextColor3 = rainbowColor
+    end
+end)
+
+----------------------------------------------------
+-- THUẬT TOÁN KÉO THẢ DI CHUYỂN MENU MƯỢT MÀ -------
+----------------------------------------------------
+local dragging, dragInput, dragStart, startPos
+local TweenService = game:GetService("TweenService")
+
+local function update(input)
+    local delta = input.Position - dragStart
+    local targetPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    TweenService:Create(G, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
+end
+
+H.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = G.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+
+H.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+end)
+
+B.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then update(input) end
+end)
+
+F.MouseButton1Click:Connect(function() G.Visible = not G.Visible end)
+
+-- NÚT BẬT TẮT ESP
+local O = Instance.new("TextButton", G)
+O.Size, O.Position, O.Text, O.BackgroundColor3, O.TextColor3, O.Font, O.TextSize = UDim2.new(1, -20, 0, 35), UDim2.new(0, 10, 0, 45), "ESP: OFF", Color3.fromRGB(50, 50, 50), Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+local CornerO = Instance.new("UICorner", O) CornerO.CornerRadius = UDim.new(0, 6)
+
+-- HÀM TẠO Ô NHẬP LIỆU CHUNG (TEXTBOX)
+local function createInputField(labelTitle, defaultVal, yPos)
+    local container = Instance.new("Frame", G)
+    container.Size, container.Position, container.BackgroundTransparency = UDim2.new(1, -20, 0, 35), UDim2.new(0, 10, 0, yPos), 1
+    
+    local label = Instance.new("TextLabel", container)
+    label.Size, label.Text, label.TextColor3, label.TextXAlignment, label.BackgroundTransparency, label.Font, label.TextSize = UDim2.new(0, 100, 1, 0), labelTitle, Color3.fromRGB(255, 255, 255), Enum.TextXAlignment.Left, 1, Enum.Font.SourceSansBold, 13
+    
+    local box = Instance.new("TextBox", container)
+    box.Size, box.Position, box.Text, box.BackgroundColor3, box.TextColor3, box.Font, box.TextSize = UDim2.new(0, 80, 0, 25), UDim2.new(1, -80, 0.5, -12), tostring(defaultVal), Color3.fromRGB(40, 40, 40), Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+    box.ClearTextOnFocus = false
+    local CornerBox = Instance.new("UICorner", box) CornerBox.CornerRadius = UDim.new(0, 4)
+    
+    local StrokeBox = Instance.new("UIStroke", box)
+    StrokeBox.Thickness = 1
+    StrokeBox.Color = Color3.fromRGB(70, 70, 70)
+    
+    return box
+end
+
+-- TẠO CÁC Ô NHẬP SỐ TRÊN MENU
+local SpeedBox = createInputField("⚡ Tốc độ:", U, 90)
+local JumpBox = createInputField("🦘 Sức nhảy:", V, 130)
+
+-- XỬ LÝ SỰ KIỆN KHI NGƯỜI CHƠI NHẬP SỐ MỚI
+SpeedBox.FocusLost:Connect(function()
+    local num = tonumber(SpeedBox.Text)
+    if num then U = math.clamp(num, 0, 200) SpeedBox.Text = tostring(U) else SpeedBox.Text = tostring(U) end
+end)
+
+JumpBox.FocusLost:Connect(function()
+    local num = tonumber(JumpBox.Text)
+    if num then V = math.clamp(num, 0, 300) JumpBox.Text = tostring(V) else JumpBox.Text = tostring(V) end
+end)
+
+-- NÚT BẤM TELEPORT NGẪU NHIÊN
+local TpBtn = Instance.new("TextButton", G)
+TpBtn.Size, TpBtn.Position, TpBtn.Text, TpBtn.BackgroundColor3, TpBtn.TextColor3, TpBtn.Font, TpBtn.TextSize = UDim2.new(1, -20, 0, 35), UDim2.new(0, 10, 0, 175), "🌀 Teleport Ngẫu Nhiên", Color3.fromRGB(0, 85, 170), Color3.fromRGB(255, 255, 255), Enum.Font.SourceSansBold, 13
+local CornerTpBtn = Instance.new("UICorner", TpBtn) CornerTpBtn.CornerRadius = UDim.new(0, 6)
+
+TpBtn.MouseButton1Click:Connect(function()
+    local playersList = A:GetPlayers()
+    local targets = {}
+    for _, p in pairs(playersList) do
+        if p ~= C and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            table.insert(targets, p)
+        end
+    end
+    if #targets > 0 then
+        local randomPlayer = targets[math.random(1, #targets)]
+        local myRoot = C.Character and C.Character:FindFirstChild("HumanoidRootPart")
+        local targetRoot = randomPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if myRoot and targetRoot then
+            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 2)
+        end
+    end
+end)
+
+----------------------------------------------------
+-- CHỮ KÝ TÁC GIẢ (dinhnhat viết nghiêng) -----------
+local W = Instance.new("TextLabel", G)
+W.Size, W.Position, W.Text, W.TextColor3, W.BackgroundTransparency, W.TextSize, W.Font, W.TextXAlignment = UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 260), "script by dinhnhat", Color3.fromRGB(150, 150, 150), 1, 11, Enum.Font.SourceSansItalic, Enum.TextXAlignment.Right
+
+-- VÒNG LẶP ĐỒNG BỘ CHỈ SỐ NHÂN VẬT CHẠY NGẦM
+task.spawn(function()
+    while true do 
+        pcall(function()
+            if C.Character then 
+                local hum = C.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    if not hum.UseJumpPower then hum.UseJumpPower = true end
+                    if hum.WalkSpeed ~= U then hum.WalkSpeed = U end 
+                    if hum.JumpPower ~= V then hum.JumpPower = V end
+                end 
+            end 
+        end)
+        task.wait(0.3)
+    end 
+end)
+
+-- LOGIC SỰ KIỆN ESP
+local function addESP(c)
+    if not c or c:FindFirstChild("CRAB_RAINBOW_ESP") then return end
+    local p = A:GetPlayerFromCharacter(c)
+    if p == C then return end
+    local h = Instance.new("Highlight", c)
+    h.Name, h.FillColor, h.OutlineColor, h.FillTransparency, h.OutlineTransparency = "CRAB_RAINBOW_ESP", Color3.fromRGB(255, 0, 0), Color3.fromRGB(255, 255, 255), 0.4, 0
+end
+
+local function removeESP(c) if c and c:FindFirstChild("CRAB_RAINBOW_ESP") then c.CRAB_RAINBOW_ESP:Destroy() end end
+
+task.spawn(function()
+    while true do 
+        for _, p in pairs(A:GetPlayers()) do 
+            if p.Character then 
+                if T and p ~= C then addESP(p.Character) else removeESP(p.Character) end 
+            end 
+        end
+        task.wait(0.5)
+    end 
+end)
+
+A.PlayerRemoving:Connect(function(p) if p.Character then removeESP(p.Character) end end)
+O.MouseButton1Click:Connect(function() T = not T; O.Text = T and "ESP: ON" or "ESP: OFF" O.BackgroundColor3 = T and Color3.fromRGB(0, 140, 0) or Color3.fromRGB(50, 50, 50) end)
